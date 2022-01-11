@@ -52,20 +52,15 @@ async function main() {
   const GasPriceOracle = optimismContracts.getContractFactory('OVM_GasPriceOracle')
     .attach(optimismContracts.predeploys.OVM_GasPriceOracle).connect(provider)
 
-  // Create an unsigned transaction
-  // Most parameters are added by `populateTransaction`.
-  let unsignedTx = await greeter.populateTransaction[methodName](methodParam)
-
-  // gasPrice and gasLimit we can get from when we calculated the L2 gas fee
-  unsignedTx.gasPrice = l2GasPrice
-  unsignedTx.gasLimit = l2Gas
-
-  // We need to remove the from field from the unsigned transaction before we
-  // serialize the transaction.
-  delete unsignedTx["from"]
+  // Get the data for the transaction (this needs to be accurate because
+  // bytes with zero cost less than other values)
+  const txData = (await greeter.populateTransaction[methodName](methodParam))
+    .data
 
   // To read the gas fee we need a serialized transaction
-  const serializedTx = ethers.utils.serializeTransaction(unsignedTx)
+  const serializedTx = ethers.utils.serializeTransaction({
+       data: txData
+  })
 
   // Use GasPriceOracle.getL1Fee to get the L1 fee
   const l1Fee = await GasPriceOracle.getL1Fee(serializedTx)
