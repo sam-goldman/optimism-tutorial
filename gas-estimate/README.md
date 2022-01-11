@@ -36,7 +36,11 @@ We assume you already have a local development node, as explained in [this tutor
 // Runtime Environment's members available in the global scope.
 const hre = require("hardhat");
 const optimismContracts = require("@eth-optimism/contracts")
+```
 
+We need to use the [Gas Price Oracle](https://github.com/ethereum-optimism/optimism/blob/develop/packages/contracts/contracts/L2/predeploys/OVM_GasPriceOracle.sol) contract.
+
+```js
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
   // line interface.
@@ -48,18 +52,37 @@ async function main() {
   // Get network information
   await hre.ethers.provider._networkPromise
   const provider = hre.ethers.provider
+```  
 
+We need the provider with all the information, so we `await` until `_networkPromise`, which reads that information, is fulfilled.
+
+
+```js
   const Greeter = await hre.ethers.getContractFactory("Greeter");
   let greeter
+```
 
+This is [the standard `Greeter` contract from HardHat](https://github.com/nomiclabs/hardhat/blob/master/packages/hardhat-core/sample-projects/basic/contracts/Greeter.sol).
+
+```js
   switch (provider._network.chainId) {
     case 10:   // If we are on the main Optimistic network, use an existing contract
       greeter = await Greeter.attach("0x3810B272B40bb01d9eb63fD3a3b935011A40Fa71")
       break
+```
+
+The production network already has [a Greeter contract](https://optimistic.etherscan.io/address/0x3810b272b40bb01d9eb63fd3a3b935011a40fa71) deployed, so you won't have to waste money deploying your own.
+
+```js
     case 420:  // Local optimism development node, deploy a new contract
       greeter = await Greeter.deploy("Hello, Hardhat!")
       await greeter.deployed();
       break;
+```
+
+[A local development node](https://community.optimism.io/docs/developers/build/dev-node) won't have a Greeter so we deploy it as part of the script.
+
+```js
     default:  // Inappropriate chain
       console.log(`We need to be on an Optimism chain, not ${provider._network.name}`)
       console.log(`Run one of these:`)
