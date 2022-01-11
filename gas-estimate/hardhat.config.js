@@ -18,23 +18,27 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
  */
 module.exports = {
   networks: {
+/*
     hardhat: {
       accounts: {
         mnemonic: 'test test test test test test test test test test test junk'
       }
     },
-    optimism: {
+*/
+    "optimism-devnode": {
       url: 'http://127.0.0.1:8545',
       accounts: {
         mnemonic: 'test test test test test test test test test test test junk'
       },
     },
+/*
     "optimism-l1": {
       url: 'http://127.0.0.1:9545',
       accounts: {
         mnemonic: 'test test test test test test test test test test test junk'
       },
     },
+*/
     "optimism-mainnet": {
       url: 'https://mainnet.optimism.io',
       accounts: {
