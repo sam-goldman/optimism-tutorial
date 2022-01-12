@@ -7,9 +7,9 @@ This tutorial shows how you can [estimate the cost of a transaction on Optimism]
 
 ## Setup
 
-We assume you already have a local development node, as explained in [this tutorial](https://github.com/ethereum-optimism/optimism-tutorial/tree/main/hardhat).
+If you want to check against a local development node, you need to create it as explained in [this tutorial](https://github.com/ethereum-optimism/optimism-tutorial/tree/main/hardhat). If you want to check against the main Optimism network there is no need for a setup beyond installing `node` and `yarn`.
 
-## Estimating the gas cost of a transaction
+## Estimating the cost of a transaction
 
 1. Install the necessary packages:
    ```sh
@@ -29,11 +29,6 @@ We assume you already have a local development node, as explained in [this tutor
 ### How it works
 
 ```javascript
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `npx hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
 const hre = require("hardhat");
 const optimismContracts = require("@eth-optimism/contracts")
 ```
@@ -42,16 +37,10 @@ We need to use the [Gas Price Oracle](https://github.com/ethereum-optimism/optim
 
 ```js
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
-
   // Get network information
   await hre.ethers.provider._networkPromise
   const provider = hre.ethers.provider
+  const signer = await hre.ethers.getSigner()
 ```  
 
 We need the provider with all the information, so we `await` until `_networkPromise`, which reads that information, is fulfilled.
@@ -62,7 +51,7 @@ We need the provider with all the information, so we `await` until `_networkProm
   let greeter
 ```
 
-This is [the standard `Greeter` contract from HardHat](https://github.com/nomiclabs/hardhat/blob/master/packages/hardhat-core/sample-projects/basic/contracts/Greeter.sol).
+This is [the standard `Greeter` contract from HardHat](https://github.com/nomiclabs/hardhat/blob/master/packages/hardhat-core/sample-projects/basic/contracts/Greeter.sol). We declare the variable here because the way we set the value depends on the chain we are on.
 
 ```js
   switch (provider._network.chainId) {
@@ -124,19 +113,19 @@ This is normal Ethereum, the same way you'd do it on L1 (except the gas price is
 The Gas Price Oracle is a predeploy and as such always at the same address, so it is easy to connect to it.
 
 ```js
-  // Get the data for the transaction (this needs to be accurate because
-  // bytes with zero cost less than other values)
-  const txData = (await greeter.populateTransaction[methodName](methodParam))
-    .data
+  // Get the transaction request fields
+  const txReq = await greeter.populateTransaction[methodName](methodParam)
+  var tx = await signer.populateTransaction(txReq)
+  delete tx.from
 ```
 
-We use `populateTransaction` to get the transaction data. The other parameters it provides, the `to` and `from` addresses, are irrelevant.
+Get the transaction fields. Note that we need to use two different versions of `populateTransaction`. The first one, which is part of the contract object, populates the `to`, `from`, and `data` fields. The second `populateTransaction`, which is a part of the signer object, populates the remaining field: `type` (at writing Optimism only supports type 0, no access lists), `gasPrice`, `gasLimit`, `nonce`, and `chainId`. 
+
+The `from` field is part of the transaction, but it does not appear in the serialized transaction because it is separately encoded as part of the signature, So we need to remove it.
 
 ```js
-  // To read the gas fee we need a serialized transaction
-  const serializedTx = ethers.utils.serializeTransaction({
-       data: txData 
-  })
+  // To read the L1 fee we need a serialized transaction
+  const serializedTx = ethers.utils.serializeTransaction(tx)
 ```
 
 We need a [serialized transaction](https://docs.ethers.io/v5/api/utils/transactions/#utils-serializeTransaction) to send to Gas Price Oracle.
@@ -146,7 +135,7 @@ We need a [serialized transaction](https://docs.ethers.io/v5/api/utils/transacti
   const l1Fee = await GasPriceOracle.getL1Fee(serializedTx)
 ```
 
-You could just use [the same formula as the code](https://github.com/ethereum-optimism/optimism/blob/develop/packages/contracts/contracts/L2/predeploys/OVM_GasPriceOracle.sol#L117-L124) to get the L1 fee. However, if you do that your code will produce inaccurate results if the formula, or the parameters, change. 
+You could just use [the same formula as the code](https://github.com/ethereum-optimism/optimism/blob/develop/packages/contracts/contracts/L2/predeploys/OVM_GasPriceOracle.sol#L117-L124) to get the L1 fee. However, if you do that your code will produce inaccurate results if the formula, or the parameters, change. It is better to rely on the oracle which will get updated as needed.
 
 
 ```js
@@ -156,3 +145,8 @@ You could just use [the same formula as the code](https://github.com/ethereum-op
 ```
 
 Report the results to the user.
+
+## Reporting costs in different currencies
+
+
+## Calculating the max amount of ETH a user can transfer
