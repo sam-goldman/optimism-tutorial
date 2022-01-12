@@ -17,13 +17,15 @@ async function main() {
   // Get network information
   await hre.ethers.provider._networkPromise
   const provider = hre.ethers.provider
+  const signer = await hre.ethers.getSigner()
 
   const Greeter = await hre.ethers.getContractFactory("Greeter");
   let greeter
 
   switch (provider._network.chainId) {
     case 10:   // If we are on the main Optimistic network, use an existing contract
-      greeter = await Greeter.attach("0x3810B272B40bb01d9eb63fD3a3b935011A40Fa71")
+      greeter = await Greeter.attach("0x3810B272B40bb01d9eb63fD3a3b935011A40Fa71").
+          connect(signer)
       break
     case 420:  // Local optimism development node, deploy a new contract
       greeter = await Greeter.deploy("Hello, Hardhat!")
@@ -52,21 +54,20 @@ async function main() {
   const GasPriceOracle = optimismContracts.getContractFactory('OVM_GasPriceOracle')
     .attach(optimismContracts.predeploys.OVM_GasPriceOracle).connect(provider)
 
-  // Get the data for the transaction (this needs to be accurate because
-  // bytes with zero cost less than other values)
-  const txData = (await greeter.populateTransaction[methodName](methodParam))
-    .data
+  // Get the transaction request fields
+  const txReq = await greeter.populateTransaction[methodName](methodParam)
+  var tx = await signer.populateTransaction(txReq)
+  delete tx.from
 
-  // To read the gas fee we need a serialized transaction
-  const serializedTx = ethers.utils.serializeTransaction({
-       data: txData
-  })
+  // To read the L1 fee we need a serialized transaction
+  const serializedTx = ethers.utils.serializeTransaction(tx)
 
   // Use GasPriceOracle.getL1Fee to get the L1 fee
   const l1Fee = await GasPriceOracle.getL1Fee(serializedTx)
 
   console.log(`   L1 fee: ${String(l1Fee).padStart(30)} wei`)
   console.log(`Fee total: ${String(BigInt(l1Fee)+BigInt(l2Fee)).padStart(30)} wei`)
+
 }
 
 // We recommend this pattern to be able to use async/await everywhere
