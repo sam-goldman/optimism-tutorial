@@ -9,7 +9,7 @@ This tutorial shows how you can [estimate the cost of a transaction on Optimism]
 
 If you want to check against a local development node, you need to create it as explained in [this tutorial](https://github.com/ethereum-optimism/optimism-tutorial/tree/main/hardhat). If you want to check against the main Optimism network there is no need for a setup beyond installing `node` and `yarn`.
 
-## Estimating the gas cost of a transaction
+## Estimating the cost of a transaction
 
 1. Install the necessary packages:
    ```sh
@@ -145,3 +145,8 @@ You could just use [the same formula as the code](https://github.com/ethereum-op
 ```
 
 Report the results to the user.
+
+## Reporting costs in different currencies
+
+
+## Calculating the max amount of ETH a user can transfer
