@@ -6,7 +6,7 @@
 This is a practical guide to getting a Standard ERC721 contract deployed on Optimism so that your L1 ERC721 can be bridged using the
 [ERC721 Bridge implementation](https://github.com/sam-goldman/optimism/tree/nft-bridge).
 
-For an L1/L2 ERC721 pair to work on the ERC721 Bridge, the L2 token contract has to implement
+For an L1/L2 ERC721 pair to work on the ERC721 Bridge, the L2 ERC721 contract has to implement
 [`IL2StandardERC721`](https://github.com/sam-goldman/optimism/blob/nft-bridge/packages/contracts/contracts/L2/messaging/IL2ERC721Bridge.sol). The standard implementation of that is available in the
 [`L2StandardERC721`](https://github.com/sam-goldman/optimism/blob/nft-bridge/packages/contracts/contracts/L2/messaging/L2ERC721Bridge.sol) contract.
 
@@ -22,8 +22,8 @@ See an example config at [.env.example](.env.example); copy into a `.env` file b
 
 `PRIVATE_KEY` - this account is going to be used to call the factory and create your L2 ERC721. Remember to fund your account for deployment.
 `INFURA_ID` - is your Infura ID for using `optimistic-kovan` and `optimistic-mainnet`.
-`L1_TOKEN_ADDRESS` - address of the L1 ERC721 which you want to bridge.
-`L2_TOKEN_NAME` and `L2_TOKEN_SYMBOL` are properties of the L2 token instance. These are normally the same as the ERC721 properties on L1.
+`L1_ERC721_ADDRESS` - address of the L1 ERC721 which you want to bridge.
+`L2_ERC721_NAME` and `L2_ERC721_SYMBOL` are properties of the L2 ERC721 contract. These are normally the same as the ERC721 properties on L1.
 
 ### Running the deploy script
 
