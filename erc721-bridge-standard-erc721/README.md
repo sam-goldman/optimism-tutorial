@@ -21,8 +21,11 @@ The hardhat config `hardhat.config.js` is already setup to run against `optimist
 See an example config at [.env.example](.env.example); copy into a `.env` file before running.
 
 `PRIVATE_KEY` - this account is going to be used to call the factory and create your L2 ERC721. Remember to fund your account for deployment.
-`INFURA_ID` - is your Infura ID for using `optimistic-kovan` and `optimistic-mainnet`.
+
+`INFURA_ID` - your Infura ID for using `optimistic-kovan` and `optimistic-mainnet`.
+
 `L1_ERC721_ADDRESS` - address of the L1 ERC721 which you want to bridge.
+
 `L2_ERC721_NAME` and `L2_ERC721_SYMBOL` are properties of the L2 ERC721 contract. These are normally the same as the ERC721 properties on L1.
 
 ### Running the deploy script
