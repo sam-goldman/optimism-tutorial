@@ -22,9 +22,10 @@ async function main() {
     hre.network.name,
     "network"
   );
+
   // Instantiate the Standard ERC721 factory
   const l2StandardERC721Factory = new ethers.Contract(
-    "0x4200000000000000000000000000000000000012",
+    "0xC8369642f6eC99da81072388b2E6d0ECDb148620",
     L2StandardERC721FactoryArtifact.abi,
     signer
   );
